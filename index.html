@@ -5,10 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SearchPulse</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.0/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 <style>
@@ -142,32 +141,37 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif}
 <div class="toast" id="toastEl"><i class="fas fa-check-circle"></i><span id="toastMsg"></span></div>
 
 <script>
-// ====== REPLACE THESE 4 LINES WITH YOUR REAL KEYS ======
-// AUTO-CLEAN GHOST DATA
-Object.keys(localStorage).forEach(function(key) {
-  if (key.startsWith('sb-')) localStorage.removeItem(key);
-});
+// ====== YOUR KEYS ======
 var SURL = 'https://erpedjfccxkujzryjwhq.supabase.co';
 var SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVycGVkamZjY3hrdWp6cnlqd2hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMzkzNjUsImV4cCI6MjA5MDYxNTM2NX0.gHI3Yd0JTSTLGVT8dEn0xJ_s6IVYaNfEdwUbL6IAdac';
 var GKEY = 'AIzaSyAc6FURevDxDa-B-pLF6CLm146y23B_6hw';
 var GROQ = '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';
-// ====== DON'T CHANGE ANYTHING BELOW THIS LINE ======
+
+// CLEAN OLD DATA SAFELY
+try { Object.keys(localStorage).forEach(function(k) { if(k.startsWith('sb-')) localStorage.removeItem(k); }); } catch(e) {}
 
 var sb, user = null, curProj = null, projs = [], allM = [], filtM = [], isUp = false, tc = null, sc = null;
 var icons = {ChatGPT:'fa-robot',Perplexity:'fa-circle-nodes',Gemini:'fa-gem',Claude:'fa-brain',Copilot:'fa-windows'};
 
 try { sb = window.supabase.createClient(SURL, SKEY); } catch(e) { console.error('Supabase init failed:', e); }
 
-sb.auth.getSession().then(function(r) {
-  if (r.data.session) { user = r.data.session.user; showDash(); } else { showAuth(); }
-});
-sb.auth.onAuthStateChange(function(e, s) {
-  if (e === 'SIGNED_IN' && s) { user = s.user; showDash(); }
-  if (e === 'SIGNED_OUT') { user = null; showAuth(); }
-});
-
+// FORCE SHOW LOGIN SCREEN NO MATTER WHAT
 function showAuth() { document.getElementById('authScreen').style.display = 'flex'; document.getElementById('dashScreen').style.display = 'none'; }
 function showDash() { document.getElementById('authScreen').style.display = 'none'; document.getElementById('dashScreen').style.display = 'block'; loadProjs(); }
+
+// SAFE SESSION CHECK
+try {
+  sb.auth.getSession().then(function(r) {
+    if (r.data.session) { user = r.data.session.user; showDash(); } else { showAuth(); }
+  }).catch(function() { showAuth(); });
+} catch(e) { showAuth(); }
+
+try {
+  sb.auth.onAuthStateChange(function(e, s) {
+    if (e === 'SIGNED_IN' && s) { user = s.user; showDash(); }
+    if (e === 'SIGNED_OUT') { user = null; showAuth(); }
+  });
+} catch(e) {}
 
 function toggleMode() {
   isUp = !isUp;
@@ -183,6 +187,7 @@ function doAuth() {
   var pw = document.getElementById('authPassword').value;
   if (!em || !pw) return showErr('Please fill in both fields');
   if (pw.length < 6) return showErr('Password must be at least 6 characters');
+  
   var fn = isUp ? sb.auth.signUp : sb.auth.signInWithPassword;
   fn({ email: em, password: pw }).then(function(r) {
     if (r.error) {
@@ -192,10 +197,12 @@ function doAuth() {
     } else if (isUp) {
       showErr('Account created! Check email or try Sign In.');
     }
+  }).catch(function(err) {
+    showErr('Network error: ' + err.message);
   });
 }
 
-function doSignOut() { sb.auth.signOut(); toast('Signed out'); }
+function doSignOut() { try { sb.auth.signOut(); } catch(e){} toast('Signed out'); }
 
 function loadProjs() {
   sb.from('projects').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).then(function(r) {
