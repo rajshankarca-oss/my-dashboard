@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SearchPulse</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.0/dist/umd/supabase.min.js"></script>
@@ -142,6 +143,10 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif}
 
 <script>
 // ====== REPLACE THESE 4 LINES WITH YOUR REAL KEYS ======
+// AUTO-CLEAN GHOST DATA
+Object.keys(localStorage).forEach(function(key) {
+  if (key.startsWith('sb-')) localStorage.removeItem(key);
+});
 var SURL = 'https://erpedjfccxkujzryjwhq.supabase.co';
 var SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVycGVkamZjY3hrdWp6cnlqd2hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMzkzNjUsImV4cCI6MjA5MDYxNTM2NX0.gHI3Yd0JTSTLGVT8dEn0xJ_s6IVYaNfEdwUbL6IAdac';
 var GKEY = 'AIzaSyAc6FURevDxDa-B-pLF6CLm146y23B_6hw';
