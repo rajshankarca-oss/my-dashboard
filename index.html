@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SearchPulse</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+
+    <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
+        <!-- Logo / Header -->
+        <div class="text-center mb-6">
+            <div class="text-4xl mb-2">⚡</div>
+            <h1 class="text-2xl font-bold">SearchPulse</h1>
+            <p class="text-gray-400 text-sm mt-1">Sign in to your dashboard</p>
+        </div>
+
+        <!-- Inputs -->
+        <div class="space-y-4">
+            <input id="email" type="email" placeholder="Email address" class="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-blue-500">
+            <input id="password" type="password" placeholder="Password (Min 6 characters)" class="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-blue-500">
+        </div>
+
+        <!-- Buttons -->
+        <div class="mt-6 space-y-3">
+            <button onclick="handleSignIn()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded transition">
+                Sign In
+            </button>
+            <button onclick="handleSignUp()" class="w-full bg-transparent border border-gray-600 hover:border-white text-white py-3 rounded transition">
+                Sign Up
+            </button>
+        </div>
+
+        <!-- Message Area -->
+        <p id="message" class="text-center text-sm mt-4 text-red-400 hidden"></p>
+    </div>
+
+    <script>
+        // ==========================================
+        // IMPORTANT: PUT YOUR SUPABASE DETAILS HERE
+        // ==========================================
+        const SUPABASE_URL = 'https://erpedjfccxkujzryjwhq.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVycGVkamZjY3hrdWp6cnlqd2hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMzkzNjUsImV4cCI6MjA5MDYxNTM2NX0.gHI3Yd0JTSTLGVT8dEn0xJ_s6IVYaNfEdwUbL6IAdac';
+
+        // Initialize Supabase client
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Get DOM elements
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const messageText = document.getElementById('message');
+
+        // Show messages to the user
+        function showMessage(msg, isError = true) {
+            messageText.innerText = msg;
+            messageText.classList.remove('hidden', 'text-red-400', 'text-green-400');
+            messageText.classList.add(isError ? 'text-red-400' : 'text-green-400');
+        }
+
+        // Sign Up Function
+        async function handleSignUp() {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            if (password.length < 6) {
+                showMessage("Password must be at least 6 characters.");
+                return;
+            }
+
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            
+            if (error) {
+                showMessage(error.message);
+            } else {
+                showMessage("Success! Check your email to verify your account.", false);
+            }
+        }
+
+        // Sign In Function
+        async function handleSignIn() {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            
+            if (error) {
+                showMessage(error.message);
+            } else {
+                showMessage("Login successful! Redirecting...", false);
+                // If you had a dashboard page, you would redirect here:
+                // setTimeout(() => window.location.href = '/dashboard.html', 1500);
+            }
+        }
+    </script>
+</body>
+</html>
