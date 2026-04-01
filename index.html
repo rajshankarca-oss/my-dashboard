@@ -7,7 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsde<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js?v=5"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 <style>
@@ -153,7 +153,11 @@ try { Object.keys(localStorage).forEach(function(k) { if(k.startsWith('sb-')) lo
 var sb, user = null, curProj = null, projs = [], allM = [], filtM = [], isUp = false, tc = null, sc = null;
 var icons = {ChatGPT:'fa-robot',Perplexity:'fa-circle-nodes',Gemini:'fa-gem',Claude:'fa-brain',Copilot:'fa-windows'};
 
-try { sb = window.supabase.createClient(SURL, SKEY); } catch(e) { console.error('Supabase init failed:', e); }
+try { if (typeof window.supabase !== 'undefined') { 
+    try { sb = window.supabase.createClient(SURL, SKEY); } catch(e) { console.error(e); }
+} else { 
+    alert("Supabase failed to load. Please hard refresh (Ctrl+Shift+R)"); 
+} } catch(e) { console.error('Supabase init failed:', e); }
 
 // FORCE SHOW LOGIN SCREEN NO MATTER WHAT
 function showAuth() { document.getElementById('authScreen').style.display = 'flex'; document.getElementById('dashScreen').style.display = 'none'; }
